@@ -72,6 +72,20 @@ test('get accounts', function(done) {
   });
 });
 
+test('get account history with multiple types', function(done) {
+  nock(EXCHANGE_API_URL)
+      .get('/accounts/test-id/ledger')
+      .query(true)
+      .reply(200, []);
+
+  authClient.getAccountHistory('test-id', { type: ['fee', 'transfer'] }, function(err, resp, data) {
+    assert.ifError(err);
+    assert.ok(resp.req.path.match(/\?type=fee&type=transfer/));
+    nock.cleanAll();
+    done();
+  });
+});
+
 test('get account history', function(done) {
   var expectedResponse = [ {
     "id": "100",
@@ -80,15 +94,15 @@ test('get account history', function(done) {
     "balance": "239.669",
     "type": "fee",
     "details": {
-        "order_id": "d50ec984-77a8-460a-b958-66f114b0de9b",
-        "trade_id": "74",
-        "product_id": "BTC-USD"
+      "order_id": "d50ec984-77a8-460a-b958-66f114b0de9b",
+      "trade_id": "74",
+      "product_id": "BTC-USD"
     }
   }];
 
   nock(EXCHANGE_API_URL)
-      .get('/accounts/test-id/ledger')
-      .reply(200, expectedResponse);
+  .get('/accounts/test-id/ledger')
+  .reply(200, expectedResponse);
 
   authClient.getAccountHistory('test-id', function(err, resp, data) {
     assert.ifError(err);
